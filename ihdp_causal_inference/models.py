@@ -62,6 +62,8 @@ class DragonNet(nn.Module):
         #this is literally just inverse propensity weights.
         h = t / pred_t_safe - (1 - t) / (1 - pred_t_safe)
         #epsilon is just a weight itself, but not for a covariate, for the inverse propensity weight.
+        #sure, we can predict y using a normal neural network. but the weight is adjusting the data
+        #you predict from so that a type of covariate profile is equally represented on both sides.
         loss_reg = torch.sum((y - (pred_y + self.epsilon * h)) ** 2)
 
         if self.reg_on:
