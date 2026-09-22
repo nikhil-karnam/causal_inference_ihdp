@@ -60,7 +60,7 @@ class DragonNet(nn.Module):
         loss_t = F.binary_cross_entropy(pred_t_safe, t, reduction='sum')
         loss_y = torch.sum((y - pred_y) ** 2)
         h = t / pred_t_safe - (1 - t) / (1 - pred_t_safe)
-        loss_reg = torch.sum((y - pred_y - self.epsilon * h) ** 2)
+        loss_reg = torch.sum((y - (pred_y + self.epsilon * h)) ** 2)
 
         if self.reg_on:
             return loss_t + loss_y + loss_reg
