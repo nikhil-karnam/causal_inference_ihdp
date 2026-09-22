@@ -59,7 +59,9 @@ class DragonNet(nn.Module):
 
         loss_t = F.binary_cross_entropy(pred_t_safe, t, reduction='sum')
         loss_y = torch.sum((y - pred_y) ** 2)
+        #this is literally just inverse propensity weights.
         h = t / pred_t_safe - (1 - t) / (1 - pred_t_safe)
+        #epsilon is just a weight itself, but not for a covariate, for the inverse propensity weight.
         loss_reg = torch.sum((y - (pred_y + self.epsilon * h)) ** 2)
 
         if self.reg_on:
