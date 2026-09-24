@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from scipy.stats import norm, t as t_dist, wilcoxon
+from scipy.stats import norm, wilcoxon
 from statsmodels.stats.multitest import multipletests
 from tabulate import tabulate
 import matplotlib.pyplot as plt
@@ -23,20 +23,17 @@ IHDP_NAMES = [
 
 # ------------------------------------ helper defs ------------------------------------
 
-# outputs confidence interval as formatted string
-def ci(lo, hi):
+# outputs an interval as formatted string
+def interval(lo, hi):
     return f"[{lo:.3f}, {hi:.3f}]"
 
 
-# monte carlo summary across reps:
-# median of the per-rep values and the range the middle 95% of reps fall in
 def monte_carlo(est):
     est = np.asarray(est, float)
     lo, hi = np.percentile(est, [2.5, 97.5])
     return np.median(est), lo, hi
 
 
-# number of reps where the per-rep test was significant
 def n_sig(pvals, alpha=0.05):
     pvals = np.asarray(pvals, float)
     return f"{int(np.sum(pvals < alpha))}/{len(pvals)}"
@@ -69,7 +66,7 @@ def model_accuracy(base, tl, cates_oracle):
 
     def stats(pehes):
         e, lo, hi = monte_carlo(pehes)
-        return [e, ci(lo, hi)]
+        return [e, interval(lo, hi)]
 
     def stats_compare(i, j):
         d = i - j
@@ -81,8 +78,8 @@ def model_accuracy(base, tl, cates_oracle):
         k = np.clip(int(m * (m + 1) / 4 - 1.96 * np.sqrt(m * (m + 1) * (2 * m + 1) / 24)),
                     0, (len(walsh) - 1) // 2)
 
-        return [e, ci(lo, hi),
-                np.median(walsh), ci(walsh[k], walsh[-k - 1]),
+        return [e, interval(lo, hi),
+                np.median(walsh), interval(walsh[k], walsh[-k - 1]),
                 wilcoxon(i, j).pvalue,
                 np.median(100 * (1 - i / j))]
 
@@ -92,13 +89,13 @@ def model_accuracy(base, tl, cates_oracle):
     pairs = [("tl - base", t_l, b)]
 
     print("\n" + tabulate([[name] + stats(pehes) for name, pehes in zip(names, (b, t_l))],
-                          headers=["model", "median", "95% range"],
+                          headers=["model", "median", "95% replication interval"],
                           floatfmt=("", ".3f", ""),
                           colalign=("left",) * 3,
                           tablefmt="github"))
 
     print("\n" + tabulate([[label] + stats_compare(i, j) for label, i, j in pairs],
-                          headers=["comparison", "median diff", "95% range", "lehmann", "95% CI", "p (wilcoxon)", "% reduction"],
+                          headers=["comparison", "median diff", "95% replication interval", "lehmann", "95% CI", "p (wilcoxon)", "% reduction"],
                           floatfmt=("", ".3f", "", ".3f", "", ".3g", ".1f"),
                           colalign=("left",) * 7,
                           tablefmt="github"))
@@ -127,11 +124,11 @@ def blp(t, y, cates, pred_t, pred_y0):
     rows = []
     for label, e, p in zip(labels, est, pvals):
         med, lo, hi = monte_carlo(e)
-        rows.append([label, med, ci(lo, hi), n_sig(p)])
+        rows.append([label, med, interval(lo, hi), n_sig(p)])
 
     print("\n**blp**")
     print(tabulate(rows,
-                   headers=["term", "median", "95% range", "reps p < .05"],
+                   headers=["term", "median", "95% replication interval", "reps p < .05"],
                    floatfmt=("", ".3f", "", ""),
                    colalign=("left",) * 4,
                    tablefmt="github"))
@@ -161,11 +158,11 @@ def gates(t, y, cates, pred_t, pred_y0):
     rows = []
     for label, e, p in zip(labels, est, pvals):
         med, lo, hi = monte_carlo(e)
-        rows.append([label, med, ci(lo, hi), n_sig(p)])
+        rows.append([label, med, interval(lo, hi), n_sig(p)])
 
     print("\n**gates**")
     print(tabulate(rows,
-                   headers=["group", "median", "95% range", "reps p < .05"],
+                   headers=["group", "median", "95% replication interval", "reps p < .05"],
                    floatfmt=("", ".3f", "", ""),
                    colalign=("left",) * 4,
                    tablefmt="github"))
@@ -186,11 +183,11 @@ def gates_oracle(cates_oracle):
     rows = []
     for label, e in zip(labels, est):
         med, lo, hi = monte_carlo(e)
-        rows.append([label, med, ci(lo, hi)])
+        rows.append([label, med, interval(lo, hi)])
 
     print("\n**gates oracle**")
     print(tabulate(rows,
-                   headers=["group", "median", "95% range"],
+                   headers=["group", "median", "95% replication interval"],
                    floatfmt=("", ".3f", ""),
                    colalign=("left",) * 3,
                    tablefmt="github"))
@@ -215,11 +212,11 @@ def clan(x, cates, names=IHDP_NAMES):
     rows = []
     for name, d, p in zip(names, diffs, pvals):
         med, lo, hi = monte_carlo(d)
-        rows.append([name, med, ci(lo, hi), n_sig(p)])
+        rows.append([name, med, interval(lo, hi), n_sig(p)])
 
     print("\n**clan**")
     print(tabulate(rows,
-                   headers=["covariate", "median diff", "95% range", "reps p adj (holm) < .05"],
+                   headers=["covariate", "median diff", "95% replication interval", "reps p adj (holm) < .05"],
                    floatfmt=("", ".3f", "", ""),
                    colalign=("left",) * 4,
                    tablefmt="github"))
