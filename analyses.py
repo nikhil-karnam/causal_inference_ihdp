@@ -23,7 +23,6 @@ IHDP_NAMES = [
 
 # ------------------------------------ helper defs ------------------------------------
 
-# outputs an interval as formatted string
 def interval(lo, hi):
     return f"[{lo:.3f}, {hi:.3f}]"
 
