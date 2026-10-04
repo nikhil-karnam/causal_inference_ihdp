@@ -1,4 +1,4 @@
-An implementation and evaluation of a T-learner (a CATE estimator) for causal inference, benchmarked on the semi-synthetic IHDP dataset, reporting PEHE. Heterogeneity in treatment effect (HTE) was analyzed using the BLP / GATES / CLAN framework from Chernozhukov et al., pooled across 100 Monte Carlo replications. Histograms demonstrate skewed distributions across reps, justifying reporting the median. Qini curves visualize cumulative gain in outcome as the participants with the predicted highest response are treated first.
+An implementation and evaluation of a T-learner (a CATE estimator) for causal inference, benchmarked on the semi-synthetic IHDP dataset, reporting PEHE. Heterogeneity in treatment effect (HTE) was analyzed using the BLP / GATES / CLAN framework from Chernozhukov et al., pooled across 100 Monte Carlo replications. Histograms demonstrate skewed distributions across reps, justifying reporting the median. Qini curves visualize cumulative gain in outcome as the participants with the highest predicted response are treated first.
 
 
 Background:
